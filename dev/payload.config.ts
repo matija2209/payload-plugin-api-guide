@@ -3,7 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { payloadPluginApiGuide } from 'payload-plugin-api-guide'
+import { apiGuidePlugin } from 'payload-plugin-api-guide'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
@@ -38,7 +38,13 @@ const buildConfigWithMemoryDB = async () => {
     collections: [
       {
         slug: 'posts',
-        fields: [],
+        fields: [
+          { name: 'title', type: 'text', required: true },
+          { name: 'slug', type: 'text' },
+          { name: 'content', type: 'richText' },
+          { name: 'publishedAt', type: 'date' },
+          { name: 'status', type: 'select', options: ['draft', 'published'] },
+        ],
       },
       {
         slug: 'media',
@@ -58,10 +64,9 @@ const buildConfigWithMemoryDB = async () => {
       await seed(payload)
     },
     plugins: [
-      payloadPluginApiGuide({
-        collections: {
-          posts: true,
-        },
+      apiGuidePlugin({
+        enabled: true,
+        title: 'Dev Project API Guide',
       }),
     ],
     secret: process.env.PAYLOAD_SECRET || 'test-secret_key',

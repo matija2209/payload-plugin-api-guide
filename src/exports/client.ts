@@ -1,1 +1,1 @@
-export { BeforeDashboardClient } from '../components/BeforeDashboardClient.js'
+// No client components — this plugin is server-only.

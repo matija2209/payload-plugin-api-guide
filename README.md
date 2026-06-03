@@ -1,218 +1,196 @@
-# Payload Plugin Template
+# @matija2206/payload-plugin-api-guide
 
-A template repo to create a [Payload CMS](https://payloadcms.com) plugin.
+Generate a live API reference and agent-first query guide from your Payload CMS configuration.
 
-Payload is built with a robust infrastructure intended to support Plugins with ease. This provides a simple, modular, and reusable way for developers to extend the core capabilities of Payload.
+This plugin reads your live Payload config and turns it into practical API documentation, an OpenAPI reference, and agent-readable instructions — so developers and AI coding agents can understand how to query your project without guessing.
 
-To build your own Payload plugin, all you need is:
+---
 
-- An understanding of the basic Payload concepts
-- And some JavaScript/Typescript experience
+## Why
 
-## Background
+Payload's REST API is powerful, but beginners and AI agents often get the details wrong. They may assume generic REST patterns — for example, fetching a post by slug with `/api/posts/my-slug` — instead of using Payload's actual query syntax with `where.slug.equals`.
 
-Here is a short recap on how to integrate plugins with Payload, to learn more visit the [plugin overview page](https://payloadcms.com/docs/plugins/overview).
+This plugin solves that by generating project-specific documentation directly from your Payload setup.
 
-### How to install a plugin
+---
 
-To install any plugin, simply add it to your payload.config() in the Plugin array.
+## Routes
+
+All routes are served under `{payload.routes.api}/api-guide` (default: `/api/api-guide`).
+
+| Route | Description |
+|---|---|
+| `/api/api-guide` | Human-readable HTML guide |
+| `/api/api-guide/reference` | Interactive API browser (Scalar UI) |
+| `/api/api-guide/openapi.json` | OpenAPI 3.1 spec |
+| `/api/api-guide/agent.md` | Concise rules guide for AI coding agents |
+| `/api/api-guide/agent.json` | Structured project map (collections, fields, endpoints) |
+| `/api/api-guide/llms.txt` | LLM entry point with links to all resources |
+| `/api/api-guide/query-recipes.json` | Common query patterns per collection |
+
+---
+
+## Installation
+
+```bash
+npm install @matija2206/payload-plugin-api-guide
+# or
+pnpm add @matija2206/payload-plugin-api-guide
+```
+
+**Peer dependency:** `payload >= 3.85.0`
+
+---
+
+## Usage
 
 ```ts
-import myPlugin from 'my-plugin'
+import { buildConfig } from 'payload'
+import { apiGuidePlugin } from '@matija2206/payload-plugin-api-guide'
 
-export const config = buildConfig({
+export default buildConfig({
   plugins: [
-    // You can pass options to the plugin
-    myPlugin({
-      enabled: true,
+    apiGuidePlugin({
+      title: 'My Project API Guide',
     }),
   ],
+  // ...rest of config
 })
 ```
 
-### Initialization
+---
 
-The initialization process goes in the following order:
-
-1. Incoming config is validated
-2. **Plugins execute**
-3. Default options are integrated
-4. Sanitization cleans and validates data
-5. Final config gets initialized
-
-## Building the Plugin
-
-When you build a plugin, you are purely building a feature for your project and then abstracting it outside of the project.
-
-### Template Files
-
-In the Payload [plugin template](https://github.com/payloadcms/payload/tree/3.x/templates/plugin), you will see a common file structure that is used across all plugins:
-
-1. root folder
-2. /src folder
-3. /dev folder
-
-#### Root
-
-In the root folder, you will see various files that relate to the configuration of the plugin. We set up our environment in a similar manner in Payload core and across other projects, so hopefully these will look familiar:
-
-- **README**.md\* - This contains instructions on how to use the template. When you are ready, update this to contain instructions on how to use your Plugin.
-- **package**.json\* - Contains necessary scripts and dependencies. Overwrite the metadata in this file to describe your Plugin.
-- .**eslint**.config.js - Eslint configuration for reporting on problematic patterns.
-- .**gitignore** - List specific untracked files to omit from Git.
-- .**prettierrc**.json - Configuration for Prettier code formatting.
-- **tsconfig**.json - Configures the compiler options for TypeScript
-- .**swcrc** - Configuration for SWC, a fast compiler that transpiles and bundles TypeScript.
-- **vitest**.config.js - Config file for Vitest, defining how tests are run and how modules are resolved
-
-**IMPORTANT\***: You will need to modify these files.
-
-#### Dev
-
-In the dev folder, you’ll find a basic payload project, created with `npx create-payload-app` and the blank template.
-
-**IMPORTANT**: Make a copy of the `.env.example` file and rename it to `.env`. Update the `DATABASE_URL` to match the database you are using and your plugin name. Update `PAYLOAD_SECRET` to a unique string.
-**You will not be able to run `pnpm/yarn dev` until you have created this `.env` file.**
-
-`myPlugin` has already been added to the `payload.config()` file in this project.
+## Options
 
 ```ts
-plugins: [
-  myPlugin({
-    collections: {
-      posts: true,
-    },
-  }),
-]
-```
+type ApiGuidePluginOptions = {
+  /** Disable the plugin without removing it. Default: true */
+  enabled?: boolean
 
-Later when you rename the plugin or add additional options, **make sure to update it here**.
+  /** Base path under the Payload API route. Default: '/api-guide' */
+  basePath?: string
 
-You may wish to add collections or expand the test project depending on the purpose of your plugin. Just make sure to keep this dev environment as simplified as possible - users should be able to install your plugin without additional configuration required.
+  /** Title shown in the HTML guide and OpenAPI spec. Default: 'Payload API Guide' */
+  title?: string
 
-When you’re ready to start development, initiate the project with `pnpm/npm/yarn dev` and pull up [http://localhost:3000](http://localhost:3000) in your browser.
-
-#### Src
-
-Now that we have our environment setup and we have a dev project ready to - it’s time to build the plugin!
-
-**index.ts**
-
-The essence of a Payload plugin is simply to extend the payload config - and that is exactly what we are doing in this file.
-
-```ts
-export const myPlugin =
-  (pluginOptions: MyPluginConfig) =>
-  (config: Config): Config => {
-    // do cool stuff with the config here
-
-    return config
-  }
-```
-
-First, we receive the existing payload config along with any plugin options.
-
-From here, you can extend the config as you wish.
-
-Finally, you return the config and that is it!
-
-##### Spread Syntax
-
-Spread syntax (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
-
-We are going to use spread syntax to allow us to add data to existing arrays without losing the existing data. It is crucial to spread the existing data correctly – else this can cause adverse behavior and conflicts with Payload config and other plugins.
-
-Let’s say you want to build a plugin that adds a new collection:
-
-```ts
-config.collections = [
-  ...(config.collections || []),
-  // Add additional collections here
-]
-```
-
-First we spread the `config.collections` to ensure that we don’t lose the existing collections, then you can add any additional collections just as you would in a regular payload config.
-
-This same logic is applied to other properties like admin, hooks, globals:
-
-```ts
-config.globals = [
-  ...(config.globals || []),
-  // Add additional globals here
-]
-
-config.hooks = {
-  ...(incomingConfig.hooks || {}),
-  // Add additional hooks here
+  /** Include auth-enabled collections. Default: true */
+  includeAuth?: boolean
 }
 ```
 
-Some properties will be slightly different to extend, for instance the onInit property:
+---
+
+## What gets generated
+
+### From your collections
+
+For each collection the plugin reads:
+
+- slug, labels (singular/plural)
+- all field names, types, required status, localization
+- relationship fields and their targets
+- upload fields
+- whether a `slug` field exists (for slug-based fetch recipes)
+- whether drafts are enabled
+- whether auth is enabled
+- whether it is an upload collection
+
+### From your globals
+
+For each global:
+
+- slug, label
+- all field names and types
+
+### Generated outputs
+
+**`/api/api-guide`** — A self-contained HTML page explaining how to use the REST API for this specific project. Includes field tables per collection, fetch examples, and a common-mistakes section.
+
+**`/api/api-guide/reference`** — Scalar UI loaded from CDN, pointed at the generated OpenAPI spec.
+
+**`/api/api-guide/openapi.json`** — A complete OpenAPI 3.1 spec with:
+- Paths for every collection (`GET`, `POST`, `PATCH`, `DELETE`) and global (`GET`, `POST`)
+- Slug-based fetch path for collections that have a `slug` field
+- Shared query parameter components (`where`, `depth`, `select`, `limit`, `page`, `sort`, `locale`, `draft`)
+- Schema components per collection derived from field definitions
+
+**`/api/api-guide/agent.md`** — A markdown guide written for AI coding agents. Includes:
+- Critical rules (slug fetch pattern, qs-esm usage, depth, select, pagination)
+- `qs-esm` code example
+- Per-collection field tables and fetch examples
+- Common mistakes table
+
+**`/api/api-guide/agent.json`** — A structured JSON project map. Includes:
+- `apiBase`, `collections`, `globals`
+- Per-collection: field list, endpoint URLs, slug field name, draft/auth/upload traits
+- `queryGuide` block explaining Payload REST conventions in machine-readable form
+
+**`/api/api-guide/llms.txt`** — An entry-point file for LLMs following the [llms.txt](https://llmstxt.org) convention. Lists all generated resources with links.
+
+**`/api/api-guide/query-recipes.json`** — An array of concrete query recipes per collection:
+- List documents
+- Fetch by ID
+- Fetch by slug (where-based)
+- Paginated fetch
+- Fetch only published (for draft-enabled collections)
+- Fetch with populated relationships
+- Fetch with selected fields only
+- Fetch global
+
+---
+
+## Agent workflow
+
+The recommended agent workflow when entering a Payload project with this plugin:
+
+1. Read `/api/api-guide/llms.txt` for an overview of available resources
+2. Read `/api/api-guide/agent.md` for the rules of how to query this project
+3. Inspect `/api/api-guide/agent.json` for collections, fields, and endpoint patterns
+4. Use `/api/api-guide/openapi.json` for formal endpoint reference
+5. Write fetch code using the project-specific field names and query patterns
+
+---
+
+## Key rule
+
+> Never fetch by slug as a path segment.
+
+This is the most common Payload REST mistake:
 
 ```ts
-import { onInitExtension } from './onInitExtension' // example file
+// Wrong — returns 404 or wrong data
+fetch('/api/posts/my-slug')
 
-config.onInit = async (payload) => {
-  if (incomingConfig.onInit) await incomingConfig.onInit(payload)
-  // Add additional onInit code by defining an onInitExtension function
-  onInitExtension(pluginOptions, payload)
-}
+// Correct — use where query
+fetch('/api/posts?where[slug][equals]=my-slug&limit=1')
+  .then(r => r.json())
+  .then(({ docs }) => docs[0])
 ```
 
-If you wish to add to the onInit, you must include the **async/await**. We don’t use spread syntax in this case, instead you must await the existing `onInit` before running additional functionality.
-
-In the template, we have stubbed out some addition `onInit` actions that seeds in a document to the `plugin-collection`, you can use this as a base point to add more actions - and if not needed, feel free to delete it.
-
-##### Types.ts
-
-If your plugin has options, you should define and provide types for these options.
+Use [`qs-esm`](https://www.npmjs.com/package/qs-esm) to build `where` queries safely:
 
 ```ts
-export type MyPluginConfig = {
-  /**
-   * List of collections to add a custom field
-   */
-  collections?: Partial<Record<CollectionSlug, true>>
-  /**
-   * Disable the plugin
-   */
-  disabled?: boolean
-}
-```
+import qs from 'qs-esm'
 
-If possible, include JSDoc comments to describe the options and their types. This allows a developer to see details about the options in their editor.
-
-##### Testing
-
-Having a test suite for your plugin is essential to ensure quality and stability. **Vitest** is a fast, modern testing framework that works seamlessly with Vite and supports TypeScript out of the box.
-
-Vitest organizes tests into test suites and cases, similar to other testing frameworks. We recommend creating individual tests based on the expected behavior of your plugin from start to finish.
-
-Writing tests with Vitest is very straightforward, and you can learn more about how it works in the [Vitest documentation.](https://vitest.dev/)
-
-For this template, we stubbed out `int.spec.ts` in the `dev` folder where you can write your tests.
-
-```ts
-describe('Plugin tests', () => {
-  // Create tests to ensure expected behavior from the plugin
-  it('some condition that must be met', () => {
-   // Write your test logic here
-   expect(...)
-  })
+const query = qs.stringify({
+  where: { slug: { equals: 'my-post' } },
+  depth: 1,
+  limit: 1,
 })
+const res = await fetch(`/api/posts?${query}`)
+const { docs } = await res.json()
+const post = docs[0]
 ```
 
-## Best practices
+---
 
-With this tutorial and the plugin template, you should have everything you need to start building your own plugin.
-In addition to the setup, here are other best practices aim we follow:
+## Requirements
 
-- **Providing an enable / disable option:** For a better user experience, provide a way to disable the plugin without uninstalling it. This is especially important if your plugin adds additional webpack aliases, this will allow you to still let the webpack run to prevent errors.
-- **Include tests in your GitHub CI workflow**: If you’ve configured tests for your package, integrate them into your workflow to run the tests each time you commit to the plugin repository. Learn more about [how to configure tests into your GitHub CI workflow.](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs)
-- **Publish your finished plugin to NPM**: The best way to share and allow others to use your plugin once it is complete is to publish an NPM package. This process is straightforward and well documented, find out more [creating and publishing a NPM package here.](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
-- **Add payload-plugin topic tag**: Apply the tag **payload-plugin **to your GitHub repository. This will boost the visibility of your plugin and ensure it gets listed with [existing payload plugins](https://github.com/topics/payload-plugin).
-- **Use [Semantic Versioning](https://semver.org/) (SemVar)** - With the SemVar system you release version numbers that reflect the nature of changes (major, minor, patch). Ensure all major versions reference their Payload compatibility.
+- Payload `>= 3.85.0`
+- Node.js `>= 18.20.2`
 
-# Questions
+---
 
-Please contact [Payload](mailto:dev@payloadcms.com) with any questions about using this plugin template.
+## License
+
+MIT
