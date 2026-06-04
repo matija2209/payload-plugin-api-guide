@@ -1,23 +1,45 @@
 {
-  "name": "@matija2206/payload-plugin-api-guide",
-  "version": "0.1.0",
+  "name": "@matija2209/payload-agent-api-guide",
+  "version": "1.0.1",
   "description": "Generate a live API reference and agent-first query guide for your Payload CMS project",
+  "keywords": [
+    "payload",
+    "payloadcms",
+    "plugin",
+    "openapi",
+    "api",
+    "documentation",
+    "llms"
+  ],
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matija2209/payload-plugin-api-guide.git"
+  },
+  "bugs": {
+    "url": "https://github.com/matija2209/payload-plugin-api-guide/issues"
+  },
+  "homepage": "https://github.com/matija2209/payload-plugin-api-guide#readme",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./client": {
-      "import": "./src/exports/client.ts",
-      "types": "./src/exports/client.ts",
-      "default": "./src/exports/client.ts"
+      "import": "./dist/exports/client.js",
+      "types": "./dist/exports/client.d.ts",
+      "default": "./dist/exports/client.js"
+    },
+    "./rsc": {
+      "import": "./dist/exports/rsc.js",
+      "types": "./dist/exports/rsc.d.ts",
+      "default": "./dist/exports/rsc.js"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
   "files": [
     "dist"
   ],
@@ -35,9 +57,10 @@
     "generate:types": "pnpm dev:generate-types",
     "lint": "eslint",
     "lint:fix": "eslint ./src --fix",
+    "prepublishOnly": "pnpm build && pnpm test:int",
     "test": "pnpm test:int && pnpm test:e2e",
     "test:e2e": "playwright test",
-    "test:int": "vitest"
+    "test:int": "vitest run"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -81,29 +104,10 @@
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9 || ^10 || ^11"
   },
+  "packageManager": "pnpm@11.5.1",
   "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
-      }
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "unrs-resolver"
-    ]
-  },
-  "registry": "https://registry.npmjs.org/",
   "dependencies": {}
 }

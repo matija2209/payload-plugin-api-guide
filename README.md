@@ -1,4 +1,4 @@
-# @matija2206/payload-plugin-api-guide
+# @matija2209/payload-agent-api-guide
 
 Generate a live API reference and agent-first query guide from your Payload CMS configuration.
 
@@ -33,9 +33,9 @@ All routes are served under `{payload.routes.api}/api-guide` (default: `/api/api
 ## Installation
 
 ```bash
-npm install @matija2206/payload-plugin-api-guide
+npm install @matija2209/payload-agent-api-guide
 # or
-pnpm add @matija2206/payload-plugin-api-guide
+pnpm add @matija2209/payload-agent-api-guide
 ```
 
 **Peer dependency:** `payload >= 3.85.0`
@@ -46,7 +46,7 @@ pnpm add @matija2206/payload-plugin-api-guide
 
 ```ts
 import { buildConfig } from 'payload'
-import { apiGuidePlugin } from '@matija2206/payload-plugin-api-guide'
+import { apiGuidePlugin } from '@matija2209/payload-agent-api-guide'
 
 export default buildConfig({
   plugins: [
@@ -188,6 +188,40 @@ const post = docs[0]
 
 - Payload `>= 3.85.0`
 - Node.js `>= 18.20.2`
+
+---
+
+## Release process
+
+The package is intended to publish compiled output from `dist/`.
+
+Before publishing locally:
+
+```bash
+pnpm install
+pnpm build
+pnpm test:int
+npm pack --dry-run
+npm publish --dry-run
+```
+
+For the first public release, publish manually:
+
+```bash
+npm publish --access public
+```
+
+After the package exists on npm, configure npm trusted publishing for
+`@matija2209/payload-agent-api-guide` and use the GitHub Actions workflows in
+`.github/workflows/`.
+
+Recommended release flow:
+
+1. Open a PR and let `.github/workflows/ci.yml` run build, lint, integration tests, and e2e.
+2. Bump `package.json` to the next version and commit it.
+3. Create a matching tag like `v1.0.1`.
+4. Push the commit and the tag.
+5. `.github/workflows/publish.yml` publishes only if the tag matches the package version exactly.
 
 ---
 

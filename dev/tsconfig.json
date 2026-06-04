@@ -19,13 +19,13 @@
       "@payload-config": [
         "./payload.config.ts"
       ],
-      "payload-plugin-api-guide": [
+      "@matija2209/payload-agent-api-guide": [
         "../src/index.ts"
       ],
-      "payload-plugin-api-guide/client": [
+      "@matija2209/payload-agent-api-guide/client": [
         "../src/exports/client.ts"
       ],
-      "payload-plugin-api-guide/rsc": [
+      "@matija2209/payload-agent-api-guide/rsc": [
         "../src/exports/rsc.ts"
       ]
     },

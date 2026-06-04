@@ -3,7 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { apiGuidePlugin } from 'payload-plugin-api-guide'
+import { apiGuidePlugin } from '@matija2209/payload-agent-api-guide'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
@@ -21,7 +21,7 @@ const buildConfigWithMemoryDB = async () => {
   if (process.env.NODE_ENV === 'test') {
     const memoryDB = await MongoMemoryReplSet.create({
       replSet: {
-        count: 3,
+        count: 1,
         dbName: 'payloadmemory',
       },
     })

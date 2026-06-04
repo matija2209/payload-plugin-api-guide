@@ -1,1 +1,1 @@
-// No client components — this plugin is server-only.
+export const BeforeDashboardClient = () => null

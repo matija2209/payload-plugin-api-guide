@@ -4,7 +4,7 @@ import { createApiGuideEndpoints } from './endpoints/index.js'
 import { buildApiGuideModel } from './introspect/index.js'
 import type { ApiGuidePluginOptions, ResolvedApiGuidePluginOptions } from './types.js'
 
-const PLUGIN_SLUG = 'payload-plugin-api-guide'
+const PLUGIN_SLUG = 'payload-agent-api-guide'
 
 function resolveOptions(options: ApiGuidePluginOptions): ResolvedApiGuidePluginOptions {
   return {
@@ -40,6 +40,6 @@ export type { ApiGuidePluginOptions } from './types.js'
 
 declare module 'payload' {
   interface RegisteredPlugins {
-    'payload-plugin-api-guide': ApiGuidePluginOptions
+    'payload-agent-api-guide': ApiGuidePluginOptions
   }
 }
